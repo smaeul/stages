@@ -1,0 +1,35 @@
+dir bin 0755 0 0
+dir boot 0755 0 0
+dir dev 0755 0 0
+dir etc 0755 0 0
+file etc/group overlay/group 0644 0 0
+slink etc/localtime ../usr/share/zoneinfo/Etc/UTC 0777 0 0
+slink etc/mtab ../proc/self/mounts 0777 0 0
+file etc/passwd overlay/passwd 0644 0 0
+dir home 0755 0 0
+dir lib 0755 0 0
+dir media 0755 0 0
+dir mnt 0755 0 0
+dir opt 0755 0 0
+dir proc 0755 0 0
+dir root 0700 0 0
+dir run 0755 0 0
+dir sbin 0755 0 0
+dir srv 0755 0 0
+dir sys 0755 0 0
+dir tmp 0755 0 0
+dir usr 0755 0 0
+dir usr/local/bin 0755 0 0
+dir usr/local/lib 0755 0 0
+dir usr/local/libexec 0755 0 0
+dir usr/local/sbin 0755 0 0
+dir usr/local/share 0755 0 0
+dir usr/portage 0755 0 0
+dir var 0755 0 0
+dir var/empty 0755 0 0
+slink var/lock ../run/lock 0777 0 0
+dir var/log 0755 0 0
+file var/log/lastlog overlay/lastlog 0644 0 0
+slink var/run ../run 0777 0 0
+dir var/spool/mail 3775 0 75
+dir var/tmp 1777 0 0
