@@ -1,0 +1,64 @@
+#!/bin/sh -eu
+# Copyright © 2016-2017 Samuel Holland <samuel@sholland.org>
+# See LICENSE in the project directory for license terms.
+# vim: expandtab:sts=2:sw=2:ts=8:tw=100
+#
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+info() {
+  printf 'info: %s\n' "$*" >&2
+}
+
+warn() {
+  printf 'warning: %s\n' "$*" >&2
+}
+
+outdir=/var/lib/stages/output
+srcdir=$(readlink -f "${0%/*}/..")
+tmpdir=$(mktemp -dt "build.XXXXXXXX")
+trap 'rm -fr --one-file-system "$tmpdir"' EXIT
+
+[ "${MOUNTNS:-0}" -ge 1 ] || die "not running in a mount namespace"
+
+info "reading configuration..."
+PRESET=${1:-${srcdir}/presets/default}
+[ -r "$PRESET" ] || die "preset file '${PRESET}' is not readable"
+. "$(readlink -f "$PRESET")"
+[ -n "${NAME:-}" ] || die "preset '${PRESET}' does not specify a name"
+[ -n "${TEMPLATE:-}" ] || die "preset '${PRESET}' does not specify a template"
+
+if [ -n "${SEED:-}" ]; then
+  info "extracting seed image..."
+  seedfile=$(printf '%s\n' "${outdir}/${SEED}-"* | sort -r | head -n1)
+  bsdtar xpf "$seedfile" -C "$tmpdir" --numeric-owner
+fi
+
+if [ -r "${srcdir}/templates/${TEMPLATE}/overlay.list" ]; then
+  info "applying overlay..."
+  (cd "${srcdir}/templates/${TEMPLATE}" && gen_init_cpio overlay.list) | \
+    bsdtar xpf - -C "$tmpdir" --numeric-owner
+fi
+
+if [ -x "${srcdir}/templates/${TEMPLATE}/prepare" ]; then
+  info "running prepare script..."
+  "${srcdir}/templates/${TEMPLATE}/prepare" "$tmpdir"
+fi
+
+if [ -x "${srcdir}/templates/${TEMPLATE}/chroot" ]; then
+  info "running chroot script..."
+  unshare -m env MOUNTNS="$((MOUNTNS+1))" "${srcdir}/scripts/setupchroot" \
+    "$tmpdir" "${srcdir}/templates/${TEMPLATE}/chroot"
+fi
+
+if [ -x "${srcdir}/templates/${TEMPLATE}/cleanup" ]; then
+  info "running cleanup script..."
+  "${srcdir}/templates/${TEMPLATE}/cleanup" "$tmpdir"
+fi
+
+info "creating output archive..."
+tar -cf - -C "$tmpdir" --one-file-system --strip-components=1 . | \
+  lzip -o "${outdir}/${TEMPLATE}-${NAME}-$(TZ=UTC date +%Y%m%dT%H%M%SZ).tar.lz"

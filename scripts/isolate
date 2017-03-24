@@ -1,0 +1,12 @@
+#!/bin/execlineb -P
+# Copyright © 2017 Samuel Holland <samuel@sholland.org>
+# See LICENSE in the project directory for license terms.
+# vim: expandtab:sts=2:sw=2:ts=8:tw=100
+#
+
+# this is host environment dependent
+if { mount -o bind,remount,ro / }
+if { mount -o bind,remount,ro /etc/portage }
+if { mount -o bind,remount,ro /usr/portage }
+# silence emergelog()
+if { mount -o mode=0755 -t tmpfs tmpfs /var/log }

@@ -1,0 +1,81 @@
+#!/bin/sh -eu
+# Copyright © 2016-2017 Samuel Holland <samuel@sholland.org>
+# See LICENSE in the project directory for license terms.
+# vim: expandtab:sts=2:sw=2:ts=8:tw=100
+#
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+info() {
+  printf '      %s\n' "$*" >&2
+}
+
+warn() {
+  printf 'warning: %s\n' "$*" >&2
+}
+
+rbind() {
+  local dir=$1
+  if [ -d "${root}/${dir}" ]; then
+    if mountpoint -q "${root}/${dir}"; then
+      warn "not bind mounting '${dir}': already mounted"
+    else
+      mount --rbind "/${dir}" "${root}/${dir}"
+      mount --make-rprivate "${root}/${dir}"
+      mount -o bind,remount,ro "${root}/${dir}"
+    fi
+  else
+    warn "not bind mounting '${dir}': mountpoint does not exist"
+  fi
+}
+
+tmpfs() {
+  local dir=$1 mode=$2
+  if [ -d "${root}/${dir}" ]; then
+    mount -o "mode=${mode}" -t tmpfs "$dir" "${root}/${dir}"
+  else
+    warn "not mounting tmpfs on '${dir}': mountpoint does not exist"
+  fi
+}
+
+root=${1:-}
+file=${2:-}
+[ -n "$root" ] || die "no root directory given"
+[ -n "$file" ] || die "no script file given"
+
+if ! [ -d "${root}/tmp" ]; then
+  warn "/tmp is not a directory, creating it"
+  mkdir "${root}/tmp"
+fi
+
+info "mounting filesystems..."
+rbind dev
+rbind proc
+tmpfs run 0755
+rbind sys
+tmpfs tmp 1777
+rbind usr/portage
+
+mkdir "${root}/tmp/work"
+cp "$file" "${root}/tmp/work"
+
+if [ -x "${root}/bin/sh" ]; then
+  export SHELL=/bin/sh
+else
+  warn "no /bin/sh in root '${root}'"
+  unset SHELL
+fi
+
+info "entering chroot..."
+chroot "$root" "/tmp/work/${file##*/}"
+
+info "unmounting filesystems..."
+mountpoint -q "${root}/dev" && umount -l "${root}/dev" || true
+mountpoint -q "${root}/proc" && umount -l "${root}/proc" || true
+mountpoint -q "${root}/run" && umount "${root}/run" || true
+mountpoint -q "${root}/sys" && umount -l "${root}/sys" || true
+mountpoint -q "${root}/tmp" && umount "${root}/tmp" || true
+mountpoint -q "${root}/usr/portage" && umount -l "${root}/usr/portage" || true

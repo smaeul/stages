@@ -1,0 +1,16 @@
+#!/bin/execlineb -s0
+# Copyright © 2017 Samuel Holland <samuel@sholland.org>
+# See LICENSE in the project directory for license terms.
+# vim: noexpandtab:sts=2:sw=2:ts=2:tw=100
+#
+
+unshare -m
+backtick -n dir { dirname ${0} }
+importas -u dir dir
+cd ${dir}
+if {
+  if -t { test -x ${dir}/scripts/isolate }
+  ${dir}/scripts/isolate
+}
+export MOUNTNS 1
+${dir}/scripts/controller $@
