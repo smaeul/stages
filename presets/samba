@@ -1,0 +1,11 @@
+# Required variables
+export NAME="samba"
+export TEMPLATE="container"
+
+# Template-specific variables
+export BINARIES="/bin/smbd"
+export DIRECTORIES="/etc/samba /var/lib/samba"
+export FILES=""
+export PACKAGES="net-fs/samba"
+export RECURSIVE=""
+export SERVICES="smbd"

@@ -1,0 +1,11 @@
+# Required variables
+export NAME="transmission"
+export TEMPLATE="container"
+
+# Template-specific variables
+export BINARIES="/bin/transmission-daemon"
+export DIRECTORIES="/etc/transmission /var/lib/transmission"
+export FILES=""
+export PACKAGES="net-p2p/transmission"
+export RECURSIVE="/share/transmission/web"
+export SERVICES="transmission"

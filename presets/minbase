@@ -1,0 +1,11 @@
+# Required variables
+export NAME="minbase"
+export TEMPLATE="container"
+
+# Template-specific variables
+export BINARIES="/bin/busybox"
+export DIRECTORIES=""
+export FILES=""
+export PACKAGES="sys-apps/busybox"
+export RECURSIVE=""
+export SERVICES=""

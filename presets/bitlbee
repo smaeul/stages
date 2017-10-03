@@ -1,0 +1,11 @@
+# Required variables
+export NAME="bitlbee"
+export TEMPLATE="container"
+
+# Template-specific variables
+export BINARIES="/bin/bitlbee"
+export DIRECTORIES="/etc/bitlbee /var/lib/bitlbee"
+export FILES=""
+export PACKAGES="net-im/bitlbee"
+export RECURSIVE=""
+export SERVICES="bitlbee"

@@ -1,0 +1,11 @@
+# Required variables
+export NAME="mariadb"
+export TEMPLATE="container"
+
+# Template-specific variables
+export BINARIES="/bin/mysqld"
+export DIRECTORIES="/etc/mysql /var/lib/mysql"
+export FILES=""
+export PACKAGES="dev-db/mariadb"
+export RECURSIVE="/share/mysql"
+export SERVICES="mysqld"

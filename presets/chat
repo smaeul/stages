@@ -1,0 +1,11 @@
+# Required variables
+export NAME="chat"
+export TEMPLATE="container"
+
+# Template-specific variables
+export BINARIES="/bin/bitlbee /bin/sshd /bin/tmux /bin/weechat /lib/weechat/plugins/aspell.so"
+export DIRECTORIES="/etc/bitlbee /etc/ssh /var/lib/bitlbee"
+export FILES="/share/bitlbee/help.txt /share/terminfo/r/rxvt-unicode-256color /share/terminfo/t/tmux-256color"
+export PACKAGES="app-misc/tmux net-irc/weechat net-im/bitlbee net-misc/openssh"
+export RECURSIVE="/lib/aspell-0.60 /lib/weechat/plugins"
+export SERVICES="bitlbee sshd"
