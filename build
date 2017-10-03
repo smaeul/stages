@@ -12,5 +12,6 @@ if {
   if -t { test -x ${dir}/scripts/isolate }
   ${dir}/scripts/isolate
 }
+s6-envdir environment
 export MOUNTNS 1
 ${dir}/scripts/controller $@
