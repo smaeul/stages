@@ -1,0 +1,18 @@
+dir bin 0755 0 0
+dir dev 0755 0 0
+dir etc 0755 0 0
+file etc/group overlay/group 0644 0 0
+file etc/hosts overlay/hosts 0644 0 0
+file etc/ld-musl-x86_64.path overlay/ld-musl-x86_64.path 0644 0 0
+slink etc/mtab /proc/self/mounts 0777 0 0
+file etc/passwd overlay/passwd 0644 0 0
+file etc/resolv.conf overlay/resolv.conf 0644 0 0
+dir lib 0755 0 0
+dir proc 0755 0 0
+dir run 0755 0 0
+slink sbin bin 0777 0 0
+dir sys 0755 0 0
+slink tmp /dev/shm 0777 0 0
+slink usr . 0777 0 0
+slink var/lock /run/lock 0777 0 0
+slink var/run /run 0777 0 0

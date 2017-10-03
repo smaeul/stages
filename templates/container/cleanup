@@ -1,0 +1,121 @@
+#!/bin/sh -eu
+# Copyright © 2016-2017 Samuel Holland <samuel@sholland.org>
+# See LICENSE in the project directory for license terms.
+# vim: expandtab:sts=2:sw=2:ts=8:tw=100
+#
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+info() {
+  printf '      %s\n' "$*" >&2
+}
+
+warn() {
+  printf 'warning: %s\n' "$*" >&2
+}
+
+root=${1:-}
+[ -n "$root" ] || die "no root directory given"
+
+arch=$(uname -m)
+list=$(mktemp)
+trap 'rm -f "$list"' EXIT
+
+# Basic filesystem structure to keep
+cat > "$list" << EOF
+${root}/bin/execlineb
+${root}/bin/if
+${root}/bin/redirfd
+${root}/bin/s6-applyuidgid
+${root}/bin/s6-envuidgid
+${root}/bin/s6-chown
+${root}/bin/s6-hiercopy
+${root}/bin/s6-mkdir
+${root}/bin/s6-nuke
+${root}/bin/s6-supervise
+${root}/bin/s6-svscan
+${root}/bin/wait
+${root}/etc/group
+${root}/etc/hosts
+${root}/etc/ld-musl-${arch}.path
+${root}/etc/mtab
+${root}/etc/passwd
+${root}/etc/protocols
+${root}/etc/resolv.conf
+${root}/etc/services
+${root}/etc/ssl/certs/ca-certificates.crt
+${root}/lib/ld-musl-${arch}.so.1
+${root}/lib/libc.so
+${root}/tmp
+${root}/usr
+${root}/var/lock
+${root}/var/run
+EOF
+
+# Generate list of files to keep
+for bin in $BINARIES; do
+  printf '%s%s\n' "$root" "$bin" >> "$list"
+  chroot "$root" ldd "$bin" 2>/dev/null | \
+    grep -o '/lib/[[:graph:]]\+.so[[:digit:].]*' | \
+    sed "s@^@${root}@" >> "$list"
+done
+for file in $FILES; do
+  printf '%s%s\n' "$root" "$file" >> "$list"
+done
+for dir in $RECURSIVE; do
+  find "${root}${dir}" >> "$list"
+done
+
+# Resolve kept symlinks
+while read -r file; do
+  if test -L "$file"; then
+    real=$(readlink -f "$file")
+    # Ignore any symlinks outside the root directory
+    test "$real" = "${real##${root}}" && continue
+    printf '%s\n' "$real" >> "$list"
+  fi
+done < "$list"
+
+# Remove duplicate entries
+sort -o "$list" -u "$list"
+
+# Verify that all required files exist
+while read -r file; do
+  test -r "$file" || warn "file '${file}' is missing!"
+done < "$list"
+
+# Remove extraneous files
+find "$root" -depth -not -type d -print0 | \
+  grep -F -f "$list" -v -x -z | \
+  xargs -0 rm
+
+# Clean up empty directories
+find "$root" -type d -empty -delete
+
+# Create requested directories
+for dir in $DIRECTORIES; do
+  mkdir -p "${root}${dir}"
+done
+mkdir -p "${root}/var/empty"
+
+# Fix ldso path (remove missing dirs)
+printf '' > "$list"
+while read -r dir; do
+  dir=${dir#/usr}
+  test -d "${root}${dir}" && printf '%s\n' "$dir" >> "$list"
+done < "${root}/etc/ld-musl-${arch}.path"
+sort -u "$list" > "${root}/etc/ld-musl-${arch}.path"
+
+# Sync service definitions
+mkdir -p "${root}/etc/service"
+rsync -a "services/.s6-svscan" "${root}/etc/service/"
+for service in $SERVICES; do
+  rsync -a "services/${service}" "${root}/etc/service/"
+done
+
+# Lock down permissions
+chmod -R a-w "$root"
+chmod -R u+w "${root}/etc/service"

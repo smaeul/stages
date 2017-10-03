@@ -1,0 +1,32 @@
+#!/bin/sh -eu
+# Copyright © 2016-2017 Samuel Holland <samuel@sholland.org>
+# See LICENSE in the project directory for license terms.
+# vim: expandtab:sts=2:sw=2:ts=8:tw=100
+#
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+info() {
+  printf '      %s\n' "$*" >&2
+}
+
+warn() {
+  printf 'warning: %s\n' "$*" >&2
+}
+
+root=${1:-}
+[ -n "$root" ] || die "no root directory given"
+
+# Install packages
+export INSTALL_MASK="/etc/portage charset.alias"
+emerge --root="$root" -Kv app-misc/ca-certificates dev-lang/execline \
+  sys-apps/baselayout sys-apps/s6 sys-apps/s6-portable-utils sys-devel/gcc \
+  sys-libs/musl
+[ -n "${PACKAGES:-}" ] && emerge --root="$root" -Kv $PACKAGES
+
+# Fix ldso
+ln -fns libc.so "${root}/lib/ld-musl-$(uname -m).so.1"
+ldconfig -r "$root" -X
