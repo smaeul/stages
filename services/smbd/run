@@ -1,0 +1,6 @@
+#!/bin/execlineb -P
+if { s6-mkdir -p /run/lock/msg.lock }
+if { s6-mkdir -p /run/samba }
+if { s6-mkdir -p /var/log/samba }
+redirfd -r 0 /dev/null
+smbd -F -S --no-process-group --option=enablecorefiles=no

@@ -1,0 +1,6 @@
+#!/bin/execlineb -P
+s6-envuidgid service
+if { s6-mkdir -p /run/bitlbee }
+if { s6-chown -U /run/bitlbee }
+s6-applyuidgid -U -z
+bitlbee -c /etc/bitlbee/bitlbee.conf -d /var/lib/bitlbee -F -n -P /run/bitlbee/pid
