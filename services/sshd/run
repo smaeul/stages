@@ -1,2 +1,3 @@
 #!/bin/execlineb -P
+if { ssh-keygen -A }
 /bin/sshd -De
