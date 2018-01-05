@@ -75,9 +75,9 @@ sort -o "$list" -u "$list"
 # Resolve kept symlinks
 while read -r file; do
   if test -L "$file"; then
-    real=$(readlink -f "$file")
+    real=$(readlink -f "$file" || warn "${file} is a broken symlink")
     # Ignore any symlinks outside the root directory
-    test "$real" = "${real##${root}}" && continue
+    test "$real" = "${real#${root}}" && continue
     printf '%s\n' "$real" >> "$list"
   fi
 done < "$list"
