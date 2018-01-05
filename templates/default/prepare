@@ -25,7 +25,7 @@ rsync -a /etc/portage/ "${root}/etc/portage/"
 
 info "installing system packages..."
 export INSTALL_MASK="/etc/portage charset.alias"
-emerge --root="$root" -kv @system
+emerge --root="$root" -Kv @system
 
 info "fixing gcc..."
 env ROOT="$root" gcc-config 1

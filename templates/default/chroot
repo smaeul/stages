@@ -18,7 +18,7 @@ grpconv
 pwconv
 
 info "reinstalling system packages..."
-emerge -ekv @system
+emerge -eKv @system
 
 info "installing additional packages..."
-[ -n "${PACKAGES:-}" ] && emerge -kv $PACKAGES
+[ -n "${PACKAGES:-}" ] && emerge -Kv $PACKAGES
