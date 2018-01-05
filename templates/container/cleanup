@@ -56,17 +56,17 @@ ${root}/var/run
 EOF
 
 # Generate list of files to keep
-for bin in $BINARIES; do
-  printf '%s%s\n' "$root" "$bin" >> "$list"
-  chroot "$root" ldd "$bin" 2>/dev/null | \
+for bin in $(sed "s@\\(^\\| \\+\\)@&${root}@g" <<< "$BINARIES"); do
+  printf '%s\n' "$bin" >> "$list"
+  chroot "$root" ldd "${bin#${root}}" 2>/dev/null | \
     grep -o '/lib/[[:graph:]]\+.so[[:digit:].]*' | \
     sed "s@^@${root}@" >> "$list"
 done
-for file in $FILES; do
-  printf '%s%s\n' "$root" "$file" >> "$list"
+for file in $(sed "s@\\(^\\| \\+\\)@&${root}@g" <<< "$FILES"); do
+  printf '%s\n' "$file" >> "$list"
 done
-for dir in $RECURSIVE; do
-  find "${root}${dir}" >> "$list"
+for dir in $(sed "s@\\(^\\| \\+\\)@&${root}@g" <<< "$RECURSIVE"); do
+  find "$dir" >> "$list"
 done
 
 # Resolve kept symlinks
