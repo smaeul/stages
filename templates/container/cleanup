@@ -117,6 +117,10 @@ mkdir -p "${root}/etc/service"
 rsync -a "services/.s6-svscan" "${root}/etc/service/"
 for service in $SERVICES; do
   rsync -a "services/${service}" "${root}/etc/service/"
+  id=$(wc -l < "${root}/etc/group")
+  printf '%s:x:%d:\n' "$service" "$id" >> "${root}/etc/group"
+  printf '%s:x:%d:%d:%s:/var/empty:/bin/false\n' \
+    "$service" "$id" "$id" "$service" >> "${root}/etc/passwd"
 done
 
 # Lock down permissions

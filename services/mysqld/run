@@ -1,5 +1,5 @@
 #!/bin/execlineb -P
-s6-envuidgid service
+s6-envuidgid mysqld
 if { s6-mkdir -p /run/mysqld }
 if { s6-chown -U /run/mysqld }
 s6-applyuidgid -U -z

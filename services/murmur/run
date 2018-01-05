@@ -1,4 +1,4 @@
 #!/bin/execlineb -P
-s6-envuidgid service
+s6-envuidgid murmur
 s6-applyuidgid -U -z
 murmur -fg -ini /etc/murmur/murmur.ini
