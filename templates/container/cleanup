@@ -56,18 +56,24 @@ ${root}/var/run
 EOF
 
 # Generate list of files to keep
-for bin in $(sed "s@\\(^\\| \\+\\)@&${root}@g" <<< "$BINARIES"); do
-  printf '%s\n' "$bin" >> "$list"
-  chroot "$root" ldd "${bin#${root}}" 2>/dev/null | \
-    grep -o '/lib/[[:graph:]]\+.so[[:digit:].]*' | \
-    sed "s@^@${root}@" >> "$list"
-done
-for file in $(sed "s@\\(^\\| \\+\\)@&${root}@g" <<< "$FILES"); do
-  printf '%s\n' "$file" >> "$list"
-done
-for dir in $(sed "s@\\(^\\| \\+\\)@&${root}@g" <<< "$RECURSIVE"); do
-  find "$dir" >> "$list"
-done
+if test -n "$BINARIES"; then
+  for bin in $(printf "$BINARIES" | sed "s@\\(^\\| \\+\\)@&${root}@g"); do
+    printf '%s\n' "$bin" >> "$list"
+    chroot "$root" ldd "${bin#${root}}" 2>/dev/null | \
+      grep -o '/lib/[[:graph:]]\+.so[[:digit:].]*' | \
+      sed "s@^@${root}@" >> "$list"
+  done
+fi
+if test -n "$FILES"; then
+  for file in $(printf "$FILES" | sed "s@\\(^\\| \\+\\)@&${root}@g"); do
+    printf '%s\n' "$file" >> "$list"
+  done
+fi
+if test -n "$RECURSIVE"; then
+  for dir in $(printf "$RECURSIVE" | sed "s@\\(^\\| \\+\\)@&${root}@g"); do
+    find "$dir" >> "$list"
+  done
+fi
 
 # Remove duplicate entries
 sort -o "$list" -u "$list"
