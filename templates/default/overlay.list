@@ -27,9 +27,15 @@ dir usr/local/share 0755 0 0
 dir usr/portage 0755 0 0
 dir var 0755 0 0
 dir var/empty 0755 0 0
+dir var/ftp 0755 0 0
+dir var/games 0755 0 0
 slink var/lock ../run/lock 0777 0 0
 dir var/log 0755 0 0
 file var/log/lastlog overlay/lastlog 0644 0 0
 slink var/run ../run 0777 0 0
+dir var/spool/cron 3775 0 55
+dir var/spool/cups 3775 0 72
 dir var/spool/mail 3775 0 75
-dir var/tmp 1777 0 0
+dir var/spool/news 3775 0 80
+dir var/tmp 0755 0 0
+dir var/www 0755 0 0

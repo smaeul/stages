@@ -27,5 +27,5 @@ info "installing system packages..."
 export INSTALL_MASK="/etc/portage charset.alias"
 emerge --root="$root" -Kv @system
 
-info "fixing gcc..."
-env ROOT="$root" gcc-config 1
+info "updating library paths..."
+ldconfig -r "$root" -NX
