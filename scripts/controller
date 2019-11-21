@@ -63,5 +63,6 @@ if [ -x "${srcdir}/templates/${TEMPLATE}/cleanup" ]; then
 fi
 
 info "creating output archive..."
+mkdir -p "$outdir"
 tar -cf - -C "$tmpdir" --one-file-system . | \
-  lzip -o "${outdir}/${TEMPLATE}-${NAME}-$(TZ=UTC date +%Y%m%dT%H%M%SZ).tar"
+  xz -8 -T0 > "${outdir}/${TEMPLATE}-${NAME}-$(TZ=UTC date +%Y%m%dT%H%M%SZ).tar.xz"
