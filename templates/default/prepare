@@ -20,11 +20,15 @@ warn() {
 root=${1:-}
 [ -n "$root" ] || die "no root directory given"
 
+export INSTALL_MASK="/etc/portage charset.alias"
+
 info "copying portage configuration..."
 rsync -a /etc/portage/ "${root}/etc/portage/"
 
+info "installing baselayout..."
+FEATURES=-buildpkg USE=build emerge --root="$root" baselayout
+
 info "installing system packages..."
-export INSTALL_MASK="/etc/portage charset.alias"
 emerge --root="$root" -Kv @system
 
 info "updating library paths..."
